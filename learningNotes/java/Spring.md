@@ -553,9 +553,9 @@ ModelAndView   处理结果和视图名
 
 ViewResolver   视图解析器
 
-![<https://github.com/xrg123/note/blob/master/image/springMVC.png>]()
+![](<https://github.com/xrg123/note/blob/master/learningNotes/java/Spring.md>)
 
-![<https://github.com/xrg123/note/blob/master/image/springMVC1.png>]()
+![](<https://github.com/xrg123/note/blob/master/image/springMVC1.png>)
 
 它们之间的关系
 
