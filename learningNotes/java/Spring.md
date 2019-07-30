@@ -553,13 +553,47 @@ ModelAndView   处理结果和视图名
 
 ViewResolver   视图解析器
 
+![]()
 
+它们之间的关系
 
+1）请求发送给DispatcherServlet来处理，DispatcherServlet会依据HandlerMapping的配置调用对应的Controller来处理
 
+2）Controller将处理结果封装成ModelAndView，然后返回给DispatcherServlet
 
+3)DispatcherServlet会依据ViewResolver的解析调用对应的视图对象（比如jsp）来生成相应的页面
 
+注：视图部分可以使用jsp,也可以使用其他的视图技术，比如freemarker,velocity等等
 
-### 1、步骤
+=========================================================================
 
-*导包  导入springMVC模块的依赖包
+step1:导包   spring-MVC
+
+step2:添加配置文件
+
+step3：配置DispatcherServlet
+
+step4:写Controller
+
+step5:写jsp
+
+step6:在配置文件当中，添加HandlerMapping，ViewResolver,controller
+
+============================================================================
+
+基于注解的springMVC应用
+
+1）编程步骤：
+
+step1:导包   spring-MVC
+
+step2:添加配置文件
+
+step3：配置DispatcherServlet
+
+step4:写Controller
+
+step5:写jsp
+
+step6在配置文件当中，添加ViewResolver配置，添加组件扫描，添加MVC注解扫描
 
