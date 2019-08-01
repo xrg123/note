@@ -581,6 +581,37 @@ step5:写jsp
 
 step6:在配置文件当中，添加HandlerMapping，ViewResolver,controller
 
+<!-- 配置HandlerMapping -->
+
+	<bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="mappings">
+			<props>
+				<prop key="/hello.do">helloController</prop>
+			</props>
+		</property>
+	</bean>
+	<!-- 配置Controller -->
+	<bean id="helloController" class="controller.HelloController"/> 
+	<!-- 配置视图解析器 -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
+配置ViewResolver
+
+<!-- 配置组件扫描 -->
+
+	<context:component-scan base-package="controller"></context:component-scan>
+	<!-- 配置mvc注解扫描 -->
+	<mvc:annotation-driven></mvc:annotation-driven>
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
+
+
+
+
 ============================================================================
 
 基于注解的springMVC应用
@@ -599,3 +630,115 @@ step5:写jsp
 
 step6在配置文件当中，添加ViewResolver配置，添加组件扫描，添加MVC注解扫描
 
+```
+/**
+ * 处理器
+ * 1.不用实现Controller接口
+ * 2.方法名不做要求，返回值可以是ModelAndView，也可以是String
+ * 3.可以添加多个方法
+ * 4.使用@Controller
+ * 5.可以在方法前或类前添加@RequestMapping(相当于之前配置的HanddlerMapping)
+```
+
+<!-- 组件扫描扫描@Component,同时也扫描@Controller,@Service,@Repository,因为后三个继承@Component 
+
+	以下的配置默认打开<context:annotation-config/>,此配置声明了@Required @Autowired @PostConstruct @Resource @PreDestory
+	-->
+	<context:component-scan base-package="controller"></context:component-scan>
+	<!-- mvc扫描声明了@RequestMapping @RequestBody @ResponseBody -->
+	<mvc:annotation-driven></mvc:annotation-driven>
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
+### 2、拦截器
+
+DispatcherServlet收到请求之后，如果有拦截器，会先调用拦截器，然后再调用Controller
+
+注：过滤器属于servlet规范，而拦截器属于spring框架
+
+step1.写一个java类，实现HandlerInterceptor接口
+
+step2.在接口方法里面，实现拦截处理逻辑
+
+step3.配置拦截器
+
+过滤器：请求先到达过滤器，再到达servlet。过滤器可以拦截.html, .css, .js......
+
+拦截器：请求先到达DispatcherServlet,其先调用拦截器，再调用控制器。拦截器工作在
+
+前端控制器中
+
+<!-- 配置拦截器 -->
+
+	<mvc:interceptors>
+	<mvc:interceptor>
+		<mvc:mapping path="/**"/>                       <!-- 拦截器拦截路径,若拦截所有，则两个* -->
+		<bean class="interceptor.SomeInterceptor"/>    <!-- 拦截器类名 -->
+	</mvc:interceptor>	
+	</mvc:interceptors>
+```
+public class SomeInterceptor implements HandlerInterceptor{
+   /*
+    * 最后执行的方法
+    * arg3是Contorller所抛出的异常
+    */
+   public void afterCompletion(HttpServletRequest arg0, HttpServletResponse arg1, Object arg2, Exception arg3)
+         throws Exception {
+      System.out.println("afterComplement");
+   }
+   /*
+    * Contorller的方法已经执行完毕，正准备将ModelAndView返回DispatcherServlet之前，执行postHandle方法。
+    * 可以在该方法里面修改处理结果（ModelAndView)
+    */
+   public void postHandle(HttpServletRequest arg0, HttpServletResponse arg1, Object arg2, ModelAndView arg3)
+         throws Exception {
+      System.out.println("postHandle");
+      
+   }
+
+   /*
+    * DispatcherServlet在收到请求后，会先调用perHandle方法。如果该方法的返回值时true,则继续向后调用
+    * 如果返回值时false,则中断请求
+    * 注：DispatcherServlet,拦截器以及Controller会共享一个request,response
+    * arg2:Controller的方法对象
+    */
+   public boolean preHandle(HttpServletRequest arg0, HttpServletResponse arg1, Object arg2) throws Exception {
+      System.out.println("preHandler");
+      return true;
+   }
+
+}
+```
+
+### 3、参数
+
+读取请求参数
+
+1）方式一：通过request方法
+
+2）方式二：通过@RequestParam注解   @RequestParam("pwd")String password（通过此方法可以改变参数名称）
+
+3）方式三：通过javabean
+
+7、向页面传值
+
+1）方式一：将数据绑定到request中
+
+2）方式二：返回ModelAndView 
+
+3）方式三：将数据添加到ModelMap中
+
+4）方式四：将数据绑定到session
+
+8、重定向
+
+1）方法的返回值是字符串
+
+return "redirect:toIndex.do";
+
+2）方法的返回值是ModelAndView
+
+RedirectView rv=new RedirectView("toIndex.do");
+
+ModelAndView mav=new ModelAndView(rv);
