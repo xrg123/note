@@ -95,6 +95,8 @@ c.方法的返回类型要与resultType一致
 
 d.映射文件的namespace要等于接口的完整的名字
 
+![](<https://github.com/xrg123/note/blob/master/image/mybatis.png>)
+
 ### 3、spring集成Mybatis
 
 *导包
