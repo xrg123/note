@@ -777,6 +777,92 @@ AOP的底层机制是动态代理，动态加载类，动态调用方法
 
 @AfterThrowing
 
+![](<https://github.com/xrg123/note/blob/master/image/aop1.png>)
+
+环绕通知，可以在业务方法前后调用
+
+@Around("Bean()")
+
+![](<https://github.com/xrg123/note/blob/master/image/aop2.png>)
+
+切入点
+
+用于定位AOP的切入位置：用于指定切入到具体位置的方法类
+
+1）bean组件切入点
+
+bean(userService)
+
+bean(noteService)
+
+bean(userService) || bean(noteService)
+
+bean(*Service)
+
+2)类切入点
+
+within(类名）
+
+within(类名）|| within(类名）
+
+within(cn.tedu.note.service.impl.UserServiceImpl)
+
+within(cn.tedu.note.*.impl.*ServiceImpl)
+
+3)方法切入点
+
+execution(修饰词 类名.方法名（参数类型))
+
+execution(* cn.tedu.note.service.UserService.login(..))    必须是两个.
+
+execution(* cn.tedu.note.*.*Service.get*(..))
+
+注意：一致统一的类和方法的命名规则将有助于编写有效的切入点表达式
+
+
+
+AOP底层原理（AOP为jdk的动态代理）
+
+代理模式：不改变原有功能，为其扩展功能
+
+AOP封装了动态代理（反射调用业务层）功能，提供了更加简便的使用方式
+
+经典面试问题：
+
+AOP的底层技术是：使用了动态代理技术（java反射的一部分）
+
+关键点：
+
+1）spring AOP 利用了AspectJ AOP实现的
+
+2）AspectJ AOP 的底层用了动态代理
+
+3）动态代理有两种
+
+目标方法有接口的时候自动选用JD动态代理
+
+目标方法没有接口的时候选择CGLib
+
+![](<https://github.com/xrg123/note/blob/master/image/aop3.png>)
+
+AOP  拦截器   过滤器
+
+1）过滤器：拦截处理WEB请求
+
+2）spring MVC 拦截器： 拦截处理spring MVC 的请求流程
+
+3）AOP：拦截spring中各个组件之间方法请求
+
+声明式事务处理
+
+加@Transactional
+
+方法正常执行完自动提交事务，业务方法如果抛出RuntimeException就回滚
+
+编程式事务处理
+
+![](<https://github.com/xrg123/note/blob/master/image/aop4.png>)
+
 ### 2、步骤
 
 *导包
