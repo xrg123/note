@@ -85,7 +85,17 @@
 		
 </mapper>
 
-具体要求
+![](<https://github.com/xrg123/note/blob/master/image/mybatis.png>)
+
+Mapper映射器
+
+1）什么是Mapper映射器
+
+符合映射文件要求的接口
+
+注：mybatis会生成符合该接口要求的对象
+
+2）具体要求
 
 a.方法名要与sql的id一致
 
@@ -95,7 +105,28 @@ c.方法的返回类型要与resultType一致
 
 d.映射文件的namespace要等于接口的完整的名字
 
-![](<https://github.com/xrg123/note/blob/master/image/mybatis.png>)
+```java
+public void test1(){
+		String config="SqlMapConfig.xml";
+		//创建SqlSessionFactoryBuilder对象
+		SqlSessionFactoryBuilder ssfb=new SqlSessionFactoryBuilder();
+		//创建SqlSessionFactory对象
+		SqlSessionFactory ssf=ssfb.build(TestCase.class.getClassLoader().getResourceAsStream(config));
+		//获得SqlSession对象
+		SqlSession session=ssf.openSession();
+		//调用SqlSession对象提供的方法访问数据库
+		Employee e=new Employee();
+		e.setName("王五");
+		e.setAge(28);
+		session.insert("test.save",e);
+		//添加、修改、删除都需要提交事务
+		session.commit();
+		//关闭SqlSession
+		session.close();
+	}
+```
+
+
 
 ### 3、spring集成Mybatis
 

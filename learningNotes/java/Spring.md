@@ -742,3 +742,193 @@ return "redirect:toIndex.do";
 RedirectView rv=new RedirectView("toIndex.do");
 
 ModelAndView mav=new ModelAndView(rv);
+
+## springAop
+
+### 1、基本概念
+
+AOP 面向切面编程，特点：在不改变软件原有功能情况下，为软件插入（扩展）横切面功能（比如性能测试）
+
+对于横向功能，利用AOP可大大简化软件开发
+
+导入Aspect J包
+
+1、写一个类，用@component和@Aspect注解
+
+2、配置文件。配置组件扫描和@Aspect注解
+
+3、写方法，并用@Before（“Bean( )”)注解,bean中填写service
+
+AOP的底层机制是动态代理，动态加载类，动态调用方法
+
+
+
+切面方法的执行时机：在目标方法之前，之后执行
+
+@Before:切面方法在目标方法之前执行
+
+@After：切面方法在目标方法之后执行
+
+目标方法：被aop拦截的业务方法，称为目标方法
+
+
+
+@AfterReturning
+
+@AfterThrowing
+
+### 2、步骤
+
+*导包
+
+```
+<dependency>
+  <groupId>org.aspectj</groupId>
+  <artifactId>aspectjweaver</artifactId>
+  <version>1.8.9</version>
+</dependency>
+```
+
+*配置
+
+```
+<!-- 配置组件扫描 -->
+<context:component-scan
+        base-package="cn.tedu.note.aop"/>
+<!-- 配置aop注解扫描，使@Aspect生效 -->
+<aop:aspectj-autoproxy />
+
+```
+
+代码
+
+```java
+@Component
+@Aspect
+public class DemoAspect {
+
+    //声明test方法将在userService的全部方法之前运行
+    @Before("bean(userService)")
+    public void test() {
+        System.out.println("hello world");
+    }
+
+
+    @After("bean(userService)")
+    public void test2() {
+        System.out.println("After");
+    }
+
+
+    @AfterReturning("bean(userService)")
+    public void test3() {
+        System.out.println("AfterReturing");
+    }
+
+
+    @AfterThrowing("bean(userService)")
+    public void test4() {
+        System.out.println("AfterThrowing");
+    }
+
+
+
+
+/**
+     * 环绕通知方法：
+     * 1.必须有返回值
+     * 2.必须有参数 ProceedingJoinPoint
+     * 3.必须抛出异常
+     * 4.需要在方法中调用jp.proceed()
+     * 5.返回业务方法的返回值
+     *
+     * @param jp
+     * @return
+     * @throws Throwable
+     */
+
+ /*@Around("bean(userService)")
+    public Object test5(ProceedingJoinPoint jp) throws Throwable{
+        Object obj = jp.proceed();
+        System.out.println("业务结果"+obj);
+        throw new UserNotFoundException("修改返回结果");
+    }*/
+
+    @Around("bean(userService)")
+    public Object test5(ProceedingJoinPoint jp) throws Throwable {
+        Long time1 = System.currentTimeMillis();
+        System.out.println(time1);
+        //调用业务方法
+        Object obj = jp.proceed();
+        System.out.println("业务结果" + obj);
+        Long time2 = System.currentTimeMillis();
+        System.out.println(time2);
+        System.out.println((time2 - time1) / 1000);
+        // throw new UserNotFoundException("修改返回结果");
+        return obj;
+    }
+}
+```
+
+```java
+@Component
+@Aspect
+
+public class PointcutAspect {
+
+    @Before("bean(*Service)")
+    public void test() {
+        System.out.println("切入点测试");
+    }
+
+
+
+  /*@Before("bean(userService) || bean(notebookService)")
+     public void test() {
+            System.out.println("两个切入点测试");
+     }
+
+
+
+  @Before("within(cn.tedu.note.*.impl.*ServiceImpl)")
+        public void test(){
+         System.out.println("within切入点测试");
+     }
+
+
+
+@Before("execution(* cn.tedu.note.service.UserService.login(..))")
+     public void test() {
+         System.out.println("execute切入点测试");
+     }
+
+
+
+@Before("execution(* cn.tedu.note.*.*Service.list*(..))")
+     public void test() {
+         System.out.println("execute切入点测试");
+     }*/
+
+}
+```
+
+```java
+@Component
+@Aspect
+public class TimeAspect {
+
+    @Around("bean(*Service)")
+    public Object test(ProceedingJoinPoint jp) throws Throwable {
+        long t1 = System.currentTimeMillis();
+        Object val = jp.proceed();
+        long t2 = System.currentTimeMillis();
+        long t = t2 - t1;
+
+        //JoinPoint  对象可以获取目标业务方法的详细信息：方法签名，调用参数等
+        Signature name = jp.getSignature();
+        System.out.println(name + "用时:" + t);
+        return val;
+    }
+}
+```
+
