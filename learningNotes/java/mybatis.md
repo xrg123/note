@@ -82,7 +82,7 @@
 			select * from t_emp where id=#{id}
 			<!-- select id as empNo,name,age from t_emp where id=#{id}  -->
 		</select>
-		
+
 </mapper>
 
 ![](<https://github.com/xrg123/note/blob/master/image/mybatis.png>)
@@ -167,7 +167,7 @@ public void test1(){
       <artifactId>commons-dbcp</artifactId>
       <version>1.4</version>
     </dependency>
-    
+
   *配置文件
 
 方式一：使用mapper映射器
