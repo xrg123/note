@@ -198,7 +198,7 @@ dbcp,ojdcp,spring-jdbc
 
 EmployeeDAO dao=SqlSession.getMapper(EmployeeDAO.class)
 
-并且将这些对象添加导Spring容器里面
+并且将这些对象添加到Spring容器里面
 
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" 
