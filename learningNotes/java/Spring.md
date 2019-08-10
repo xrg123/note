@@ -653,6 +653,8 @@ step6在配置文件当中，添加ViewResolver配置，添加组件扫描，添
 	</bean>
 ### 2、拦截器
 
+![](<https://github.com/xrg123/note/blob/master/image/interceptor.png>)
+
 DispatcherServlet收到请求之后，如果有拦截器，会先调用拦截器，然后再调用Controller
 
 注：过滤器属于servlet规范，而拦截器属于spring框架

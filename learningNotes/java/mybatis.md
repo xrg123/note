@@ -336,5 +336,6 @@ dbcp,ojdcp,spring-jdbc
 	<!-- 配置组件扫描 -->
 	<context:component-scan base-package="dao"></context:component-scan>
 
-
 </beans>
+
+![](<https://github.com/xrg123/note/blob/master/image/interceptor.png>)
