@@ -175,3 +175,19 @@ ok,这也就是说。如果第二次删除缓存失败，会再次出现缓存�
 你要写入缓存的数据，都是从 mysql 里查出来的，都得写入 mysql 中，写入 mysql 中的时候必须保存一个时间戳，从 mysql 查出来的时候，时间戳也查出来。
 
 每次要**写之前，先判断**一下当前这个 value 的时间戳是否比缓存里的 value 的时间戳要新。如果是的话，那么可以写，否则，就不能用旧的数据覆盖新的数据。
+
+### 5、redis和 memcached 有什么区别？redis 的线程模型是什么？为什么 redis 单线程却能支撑高并发？
+
+#### redis 支持复杂的数据结构
+
+redis 相比 memcached 来说，拥有[更多的数据结构](https://github.com/yujianmeng/advanced-java/blob/master/docs/high-concurrency/redis-data-types.md)，能支持更丰富的数据操作。如果需要缓存能够支持更复杂的结构和操作， redis 会是不错的选择。
+
+#### redis 原生支持集群模式
+
+在 redis3.x 版本中，便能支持 cluster 模式，而 memcached 没有原生的集群模式，需要依靠客户端来实现往集群中分片写入数据。
+
+#### 性能对比
+
+由于 redis 只使用**单核**，而 memcached 可以使用**多核**，所以平均每一个核上 redis 在存储小数据时比 memcached 性能更高。而在 100k 以上的数据中，memcached 性能要高于 redis。虽然 redis 最近也在存储大数据的性能上进行优化，但是比起 memcached，还是稍有逊色。
+
+redis支持持久化
