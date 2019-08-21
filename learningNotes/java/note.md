@@ -183,4 +183,85 @@ ConcurrentHashMap:
   volatile Node<K,V> next;
   ```
 
-  3、扩容：concurrentHashMap扩容时不会进行全局扩容，而是对某一个segment进行扩容，当segment容量达到其加载因子时，进行扩容。
+  3、扩容：concurrentHashMap扩容时不会进行全局扩容，而是对某一个segment进行扩容，当segment容量达到其加载因子时，进行扩容。 
+
+  ​
+
+  ![](<https://github.com/xrg123/note/blob/master/image/concurrentHashMap.jpg>)
+
+ConcurrentHashMap是由Segment数组结构和HashEntry数组结构组成。Segment实际继承自可重入锁（ReentrantLock），在ConcurrentHashMap里扮演锁的角色；HashEntry则用于存储键值对数据。一个ConcurrentHashMap里包含一个Segment数组，每个Segment里包含一个HashEntry数组，我们称之为table，每个HashEntry是一个链表结构的元素。
+
+**面试常问：**
+
+1. **ConcurrentHashMap****实现原理是怎么样的或者问ConcurrentHashMap****如何在保证高并发下线程安全的同时实现了性能提升？**
+
+答：ConcurrentHashMap允许多个修改操作并发进行，其关键在于使用了**锁分离**技术。它使用了多个锁来控制对hash表的不同部分进行的修改。内部使用段(Segment)来表示这些不同的部分，每个段其实就是一个小的hash table，只要多个修改操作发生在不同的段上，它们就可以并发进行。
+
+- **初始化做了什么事？**
+
+初始化有三个参数
+
+**initialCapacity**：初始容量大小 ，默认16。
+
+**loadFactor,** 扩容因子，默认0.75，当一个Segment存储的元素数量大于initialCapacity* loadFactor时，该Segment会进行一次扩容。
+
+**concurrencyLevel **并发度，默认16。并发度可以理解为程序运行时能够同时更新ConccurentHashMap且不产生锁竞争的最大线程数，实际上就是ConcurrentHashMap中的分段锁个数，即Segment[]的数组长度。如果并发度设置的过小，会带来严重的锁竞争问题；如果并发度设置的过大，原本位于同一个Segment内的访问会扩散到不同的Segment中，CPU cache命中率会下降，从而引起程序性能下降。
+
+源码解惑：
+
+```java
+ while (ssize < DEFAULT_CONCURRENCY_LEVEL) {
+            ++sshift;
+            ssize <<= 1;
+        }
+```
+
+保证segment数组的大小一定为2的幂，例如用户输入17，实际数组为32
+
+```java
+ int segmentShift = 32 - sshift;
+ int segmentMask = ssize - 1;
+```
+
+保证每个segment中table数组的大小一定为2的幂，初始化时，table默认大小为2
+
+
+
+初始化时，实际只填充segment数组的第0个元素
+
+- **size方法**
+
+size的时候进行两次不加锁的统计，两次一致直接返回结果，不一致，重新加锁再次统计
+
+### **1.8中的原理和实现**
+
+- **数据结构**
+
+JDK1.8的实现已经摒弃了Segment的概念，而是直接用Node数组+链表+红黑树的数据结构来实现，并发控制使用Synchronized和CAS来操作，整个看起来就像是优化过且线程安全的HashMap，虽然在JDK1.8中还能看到Segment的数据结构，但是已经简化了属性，只是为了兼容旧版本
+![img](https://oscimg.oschina.net/oscnet/4102b1f94ad6ab6adc33293e31ff32543e9.jpg)
+
+put的过程很清晰，对当前的table进行无条件自循环直到put成功，可以分成以下六步流程来概述
+
+1. 如果没有初始化就先调用initTable（）方法来进行初始化过程
+
+2. 如果没有hash冲突就直接CAS插入
+
+3. 如果还在进行扩容操作就先进行扩容
+
+4. 如果存在hash冲突，就加锁来保证线程安全，这里有两种情况，一种是链表形式就直接遍历到尾端插入，一种是红黑树就按照红黑树结构插入，
+
+5. 最后一个如果该链表的数量大于阈值8，就要先转换成黑红树的结构，break再一次进入循环
+
+6. 如果添加成功就调用addCount（）方法统计size，并且检查是否需要扩容
+
+   ### 总结
+
+   1. JDK1.8取消了segment数组，直接用table保存数据，锁的粒度更小，减少并发冲突的概率。
+   2. JDK1.8存储数据时采用了链表+红黑树的形式，纯链表的形式时间复杂度为O(n)，红黑树则为O（logn），性能提升很大。什么时候链表转红黑树？当key值相等的元素形成的链表中元素个数超过8个的时候。
+   3. JDK1.8的实现降低锁的粒度，JDK1.7版本锁的粒度是基于Segment的，包含多个HashEntry，而JDK1.8锁的粒度就是HashEntry（首节点）
+   4. JDK1.8版本的数据结构变得更加简单，使得操作也更加清晰流畅，因为已经使用synchronized来进行同步，所以不需要分段锁的概念，也就不需要Segment这种数据结构了，由于粒度的降低，实现的复杂度也增加了
+   5. JDK1.8使用红黑树来优化链表，基于长度很长的链表的遍历是一个很漫长的过程，而红黑树的遍历效率是很快的，代替一定阈值的链表，这样形成一个最佳拍档
+   6. JDK1.8为什么使用内置锁synchronized来代替重入锁ReentrantLock，我觉得有以下几点
+      1. 因为粒度降低了，在相对而言的低粒度加锁方式，synchronized并不比ReentrantLock差，在粗粒度加锁中ReentrantLock可能通过Condition来控制各个低粒度的边界，更加的灵活，而在低粒度中，Condition的优势就没有了
+      2. JVM的开发团队从来都没有放弃synchronized，而且基于JVM的synchronized优化空间更大，使用内嵌的关键字比使用API更加自然
+      3. 在大量的数据操作下，对于JVM的内存压力，基于API的ReentrantLock会开销更多的内存，虽然不是瓶颈，但是也是一个选择依据
