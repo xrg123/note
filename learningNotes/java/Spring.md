@@ -4,7 +4,7 @@
 
 spring管理的对象成为Beans，spring支持xml和注解两种配置方式
 
-## 基本知识点
+## 一、基本知识点
 
 ### 1、依赖注入、控制反转
 
@@ -527,7 +527,7 @@ public class EmployeeDAO {
 
 ```
 
-## SpringMVC
+## 二、SpringMVC
 
 ### 1、什么是springMVC
 
@@ -745,7 +745,7 @@ RedirectView rv=new RedirectView("toIndex.do");
 
 ModelAndView mav=new ModelAndView(rv);
 
-## springAop
+## 三、springAop
 
 ### 1、基本概念
 
@@ -1020,3 +1020,112 @@ public class TimeAspect {
 }
 ```
 
+##四、SpringBoot、SpringMVC、Spring的区别
+
+Spring 是一个开源框架，为简化企业级应用开发而生。Spring 容器的主要核心是：IOC、DI、AOP等
+
+springmvc是基于mvc架构的spring web开发框架，是spring处理web请求的一个模块。
+
+springBoot是一个框架的集合，里面包含了许多东西，他们之间的关系是springMVC< spring < springboot
+
+springBoot就是把spring、spring MVC、spring data、jpa等等常用的框架组合起来，并提供默认的配置，达到开箱即用的效果。内嵌了Tomcat、整合了maven等
+
+===============================================================================
+
+spring Boot和spring Cloud
+
+Spring boot 是 Spring 的一套快速配置脚手架，可以基于spring boot 快速开发单个微服务，Spring Boot，看名字就知道是Spring的引导，就是用于启动Spring的，使得Spring的学习和使用变得快速无痛。不仅适合替换原有的工程结构，更适合微服务开发。
+
+Spring Cloud基于Spring Boot，为微服务体系开发中的架构问题，提供了一整套的解决方案——服务注册与发现，服务消费，服务保护与熔断，网关，分布式调用追踪，分布式配置管理等。
+
+Spring Cloud是一个基于Spring Boot实现的云应用开发工具；Spring boot专注于快速、方便集成的单个个体，Spring Cloud是关注全局的服务治理框架；spring boot使用了默认大于配置的理念，很多集成方案已经帮你选择好了，能不配置就不配置，Spring Cloud很大的一部分是基于Spring boot来实现。Spring boot可以离开Spring Cloud独立使用开发项目，但是Spring Cloud离不开Spring boot，属于依赖的关系
+
+======================================================================================
+
+什么是微服务？
+
+以前的模式是所有的代码在同一个工程中，部署在同一个服务器中，同一个项目的不同模块不同功能互相抢占资源  微服务将工程根据不同的业务规则拆分成微服务，微服务部署在不同的机器上， 服务之间进行相互调用     
+
+java微服务的框架有dubbo（只能用来做微服务），springCloud（提供了服务的发现，断路器等）
+
+======================================================================================
+
+springboot启动：
+
+```java
+@SpringBootApplication
+public class ServerApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(ServerApplication.class,args);
+    }
+}
+```
+
+通过@SpringBootApplication注解类中的main方法来启动，main方法中调用SpringApplication的静态方法run方法。启动时，首先构造SpringApplication实例，调用run方法后：
+
+构造SpringApplicationRunListeners 实例（时序图步骤3.1.1）
+发布ApplicationStartedEvent事件（时序图步骤3.1.2）
+SpringApplicationRunListeners 实例准备环境信息（时序图步骤3.1.3）
+创建ApplicationContext对象（时序图步骤3.1.4）
+ApplicationContext实例准备环境信息（时序图步骤3.1.5）
+刷新的上下文（时序图步骤3.1.6）
+
+- **第一步：获取并启动监听器**
+
+- **第二步：构造容器环境**
+
+- **第三步：创建容器**
+
+- **第四步：实例化SpringBootExceptionReporter.class，用来支持报告关于启动的错误**
+
+- **第五步：准备容器**
+
+- **第六步：刷新容器**
+
+- **第七步：刷新容器后的扩展接口**
+
+  ====================================================================================
+
+  用过哪些注解：
+
+  @SpringBootApplication、@Configuration、@Bean、@Component、@Controller、@Service、@Repository、@Mapper、@RequestMapping、@ReponseBody、@Resource、@Autowired/@Quafiter、@Value、@RequestParam、@Param、@ControllerAdvice(用于处理全局异常)、@ExceptionHandler(拦截特定异常 )
+
+  ​
+
+- @Bean、@Component区别
+
+  @Component注解表明此类要作为组件类，告知spring为这个类创建bean,@Bean注解告诉spring这个方法返回一个对象，对象要注册到spring的bean中
+
+- @Component、@Controller、@Service、@Repository
+
+  这几个类功能相同，只是作用在不同层次上，@Service作用在业务层，@Controller作用在控制层，@Repository作用在持久层
+
+- @Configuration
+
+  用于注解配置
+
+- @Repository和@Mapper
+
+  @Repository需要在Spring中配置扫描地址，然后生成Dao层的Bean才能被注入到Service层中。
+
+  @Mapper不需要配置扫描地址，通过xml里面的namespace里面的接口地址，生成了Bean后注入到Service层中。
+
+  ==================================================================================
+
+  maven中的依赖有哪些：
+
+  springBoot、MyBatis、junit、greenplum连接驱动、druid、jiedis(对redis的各类API进行了封装）、fastjson、pageHelper、logback+slf4j、aspect、quartz
+
+- logback+slf4j
+
+  更快的执行速度，logback速度比log4j快10倍以上
+
+  更充足的测试
+
+  快速从I/O错误中恢复
+
+  自动清除旧日志文档
+
+  自动压缩归档日志
+
+通常有七个日志记录器级别，默认只记录前三个。severe、warning、info、config、fine、finer、finest
