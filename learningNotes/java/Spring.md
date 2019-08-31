@@ -1114,7 +1114,7 @@ ApplicationContext实例准备环境信息（时序图步骤3.1.5）
 
   maven中的依赖有哪些：
 
-  springBoot、MyBatis、junit、greenplum连接驱动、druid、jiedis(对redis的各类API进行了封装）、fastjson、pageHelper、logback+slf4j、aspect、quartz
+  springBoot、MyBatis、junit、greenplum连接驱动、druid、jiedis(对redis的各类API进行了封装）、fastjson、pageHelper、logback+slf4j、aspect、quartz、rabbitMQ、JSR303的包validation
 
 - logback+slf4j
 

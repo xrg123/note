@@ -191,3 +191,41 @@ redis 相比 memcached 来说，拥有[更多的数据结构](https://github.com
 由于 redis 只使用**单核**，而 memcached 可以使用**多核**，所以平均每一个核上 redis 在存储小数据时比 memcached 性能更高。而在 100k 以上的数据中，memcached 性能要高于 redis。虽然 redis 最近也在存储大数据的性能上进行优化，但是比起 memcached，还是稍有逊色。
 
 redis支持持久化
+
+### 6、redis常用命令
+
+keys pattern:  keys *  查询所有键       keys  *test    查询所有test结束的键
+
+exists key：   查看key键是否存在（存在返回1， 不存在返回0）
+
+expire key seconds:   给key设置过期时间
+
+persist key:  删除key的过期时间
+
+rename key newkey: 给key重命名
+
+type key: 返回key的类型
+
+set key value:  设定键值对
+
+del key:  删除键
+
+hset  hashname key value:   赋值hash表
+
+hget  hashname key:  获取值
+
+lpush key value: list中插入
+
+lpop key:  移除list中的最后一个元素
+
+sadd key value: set中插入值
+
+spop key: 获取set的值
+
+zadd: zset中设定值
+
+zpop: zset中get值
+
+incr key: key的值增加1
+
+decr key：key的值减1

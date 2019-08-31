@@ -257,11 +257,26 @@ put的过程很清晰，对当前的table进行无条件自循环直到put成功
    ### 总结
 
    1. JDK1.8取消了segment数组，直接用table保存数据，锁的粒度更小，减少并发冲突的概率。
+
    2. JDK1.8存储数据时采用了链表+红黑树的形式，纯链表的形式时间复杂度为O(n)，红黑树则为O（logn），性能提升很大。什么时候链表转红黑树？当key值相等的元素形成的链表中元素个数超过8个的时候。
+
    3. JDK1.8的实现降低锁的粒度，JDK1.7版本锁的粒度是基于Segment的，包含多个HashEntry，而JDK1.8锁的粒度就是HashEntry（首节点）
+
    4. JDK1.8版本的数据结构变得更加简单，使得操作也更加清晰流畅，因为已经使用synchronized来进行同步，所以不需要分段锁的概念，也就不需要Segment这种数据结构了，由于粒度的降低，实现的复杂度也增加了
+
    5. JDK1.8使用红黑树来优化链表，基于长度很长的链表的遍历是一个很漫长的过程，而红黑树的遍历效率是很快的，代替一定阈值的链表，这样形成一个最佳拍档
+
    6. JDK1.8为什么使用内置锁synchronized来代替重入锁ReentrantLock，我觉得有以下几点
       1. 因为粒度降低了，在相对而言的低粒度加锁方式，synchronized并不比ReentrantLock差，在粗粒度加锁中ReentrantLock可能通过Condition来控制各个低粒度的边界，更加的灵活，而在低粒度中，Condition的优势就没有了
       2. JVM的开发团队从来都没有放弃synchronized，而且基于JVM的synchronized优化空间更大，使用内嵌的关键字比使用API更加自然
       3. 在大量的数据操作下，对于JVM的内存压力，基于API的ReentrantLock会开销更多的内存，虽然不是瓶颈，但是也是一个选择依据
+
+      ### 6、javaee是什么
+
+      javaME是用来开发嵌入式的，javaSE是用来开发桌面应用的，javaEE是用来开发企业端的。
+
+      jdk不分javaME、javaSE、javaEE的
+
+      javaEE可以理解为java企业级应用开发的规范，hibernate、spring是两种javaEE组件，Servlet、JSP等都是javaEE规范
+
+       Java SE是Java的标准版，主要用于桌面应用开发，同时也是Java的基础，它包含Java语言基础、JDBC（Java数据库连接性）操作、I/O（输出输出）操作、网络通信、多线程等技术。
