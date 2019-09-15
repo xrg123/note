@@ -59,8 +59,8 @@ spring中在配置文件中完成注入
 <!-- IOC/DI
 
 	set 方法     <property name="b" ref="b1"/>
-	构造器             <constructor-arg index="" ref=""/>
-	自动装配   autowire:  byName(尽量用这个，id唯一，不会出错)   byType-->
+	构造器       <constructor-arg index="" ref=""/>
+	自动装配     autowire:  byName(尽量用这个，id唯一，不会出错)   byType-->
 	
 	<!-- 
 		set方式注入
@@ -1129,3 +1129,48 @@ ApplicationContext实例准备环境信息（时序图步骤3.1.5）
   自动压缩归档日志
 
 通常有七个日志记录器级别，默认只记录前三个。severe、warning、info、config、fine、finer、finest
+
+### 1、spring的多环境配置
+
+软件开发中经常有开发环境、测试环境、预发布环境、生产环境，而且一般这些环境配置会各不相同，手动改配置麻烦且容易出错，如何管理不同环境的配置参数呢？spring-boot + maven可以解决不同环境独立配置不同参数的问题。
+
+不同环境的配置yml文件名不一样：
+
+- application-dev.yml（开发环境）
+- application-test.yml（测试环境）
+- application-uat.yml（预发布）
+- application-pro.yml（生产环境）
+
+如果要切换不同环境，只需要修改spring.profiles.active即可。
+
+### 2、自动装配原理（自动化组件）
+
+自动装配可用的注解有@Resource、@Autowire,前者是通过set方法注入的，后者可通过set方法和构造器方法注入。
+
+装配的方式有set、构造器及autoWired自动装配（byName,byType)
+
+### 3、spring事务的传播性
+
+方法一在一个事务中，方法二在另一个事务中，调用方法一创建事务一，调用方法二时，发现已经有事务一存在了，为了节省资源直接用事务一，这样的话方法二失败后事务回滚。
+
+可以更改隔离级别来改变传播性
+
+### 4、spring事务的隔离级别
+
+Spring它对JDBC的隔离级别作出了补充和扩展，其提供了7种事务传播行为。
+
+Spring它对JDBC的隔离级别作出了补充和扩展，其提供了7种事务传播行为。
+
+1、**PROPAGATION_REQUIRED：默认事务类型，如果没有，就新建一个事务；如果有，就加入当前事务。适合绝大多数情况。**
+
+2、PROPAGATION_REQUIRES_NEW：如果没有，就新建一个事务；如果有，就将当前事务挂起。
+
+ 3、PROPAGATION_NESTED：如果没有，就新建一个事务；如果有，就在当前事务中嵌套其他事务。
+
+4、PROPAGATION_SUPPORTS：如果没有，就以非事务方式执行；如果有，就使用当前事务。
+
+5、PROPAGATION_NOT_SUPPORTED：如果没有，就以非事务方式执行；如果有，就将当前事务挂起。即无论如何不支持事务。
+
+6、PROPAGATION_NEVER：如果没有，就以非事务方式执行；如果有，就抛出异常。
+
+7、PROPAGATION_MANDATORY：如果没有，就抛出异常；如果有，就使用当前事务。

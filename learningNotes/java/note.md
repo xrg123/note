@@ -257,26 +257,126 @@ put的过程很清晰，对当前的table进行无条件自循环直到put成功
    ### 总结
 
    1. JDK1.8取消了segment数组，直接用table保存数据，锁的粒度更小，减少并发冲突的概率。
-
    2. JDK1.8存储数据时采用了链表+红黑树的形式，纯链表的形式时间复杂度为O(n)，红黑树则为O（logn），性能提升很大。什么时候链表转红黑树？当key值相等的元素形成的链表中元素个数超过8个的时候。
-
    3. JDK1.8的实现降低锁的粒度，JDK1.7版本锁的粒度是基于Segment的，包含多个HashEntry，而JDK1.8锁的粒度就是HashEntry（首节点）
-
    4. JDK1.8版本的数据结构变得更加简单，使得操作也更加清晰流畅，因为已经使用synchronized来进行同步，所以不需要分段锁的概念，也就不需要Segment这种数据结构了，由于粒度的降低，实现的复杂度也增加了
-
    5. JDK1.8使用红黑树来优化链表，基于长度很长的链表的遍历是一个很漫长的过程，而红黑树的遍历效率是很快的，代替一定阈值的链表，这样形成一个最佳拍档
-
    6. JDK1.8为什么使用内置锁synchronized来代替重入锁ReentrantLock，我觉得有以下几点
       1. 因为粒度降低了，在相对而言的低粒度加锁方式，synchronized并不比ReentrantLock差，在粗粒度加锁中ReentrantLock可能通过Condition来控制各个低粒度的边界，更加的灵活，而在低粒度中，Condition的优势就没有了
       2. JVM的开发团队从来都没有放弃synchronized，而且基于JVM的synchronized优化空间更大，使用内嵌的关键字比使用API更加自然
       3. 在大量的数据操作下，对于JVM的内存压力，基于API的ReentrantLock会开销更多的内存，虽然不是瓶颈，但是也是一个选择依据
 
-      ### 6、javaee是什么
 
-      javaME是用来开发嵌入式的，javaSE是用来开发桌面应用的，javaEE是用来开发企业端的。
+### 6、javaee是什么
 
-      jdk不分javaME、javaSE、javaEE的
+javaME是用来开发嵌入式的，javaSE是用来开发桌面应用的，javaEE是用来开发企业端的。
 
-      javaEE可以理解为java企业级应用开发的规范，hibernate、spring是两种javaEE组件，Servlet、JSP等都是javaEE规范
+jdk不分javaME、javaSE、javaEE的
 
-       Java SE是Java的标准版，主要用于桌面应用开发，同时也是Java的基础，它包含Java语言基础、JDBC（Java数据库连接性）操作、I/O（输出输出）操作、网络通信、多线程等技术。
+javaEE可以理解为java企业级应用开发的规范，hibernate、spring是两种javaEE组件，Servlet、JSP等都是javaEE规范
+
+ Java SE是Java的标准版，主要用于桌面应用开发，同时也是Java的基础，它包含Java语言基础、JDBC（Java数据库连接性）操作、I/O（输出输出）操作、网络通信、多线程等技术。
+
+### 7、hashMap在多线程情况下会发生什么
+
+1）产生死循环，使cpu使用率飙升
+
+多线程进行put操作后，如果发生扩容的话，可能线程一的A节点指向B节点，线程二B节点指向A节点，这样就产生循环链表，当执行get操作时，就会发生死循环。
+
+2）丢失元素
+
+扩容操作时，线程一A元素执行B元素，线程二C元素指向B元素，那么就会有一个节点断开
+
+3）map.size()与实际数量不符
+
+丢失元素后，size()会与实际不符
+
+### 8、线程池参数
+
+corePoolSize:核心线程数
+
+maxPoolSize:最大线程数
+
+keepAliveTime：空闲线程存活时间
+
+allowCoreThreadTimeOut: 是否允许核心线程空闲退出，默认值为false。
+
+workQueue: 任务队列容量
+
+RejectedExecutionHandler: 任务拒绝策略，有四种，第一种丢弃任务并抛出异常，第二种丢弃任务，第三种执行任务并丢弃任务队列第一个任务，第四种由调用线程执行当前任务。
+
+TimeUnit:   计量时间单位
+
+### 9、Java.util.concurrent包下面用过哪些类
+
+1）线程池
+
+接口：Eexcutor、ExecutorService
+
+类：AbstractExecutorService、Executors、ThreadPoolExecutor
+
+2）阻塞队列
+
+非阻塞队列：ArrayDeque、LinkedList、PriorityQueue  这三个队列在java.util包中
+
+​			ConcurrentLinkedQueue   这个队列在java.util.Concurrent包下
+
+阻塞队列： 
+
+​       接口：BolckingQueue、BlockingDeque
+
+​       类：ArrayBlockingQueue、LinkedBlockingQueue、LinkedBolcingDeque、PriorityBlockingQueue、DelayQueue、SynchronousQueue
+
+3）ConcurrentHashMap
+
+4)线程类
+
+接口：Callable、Future
+
+类：FutureTask
+
+### 10、AQS
+
+AQS（Abustact Queued Synchronizer 抽象队列化同步器）是用来为Java的并发同步组件提供统一的底层支持，例如 `ReentrantLock, CountdowLatch` 都是基于 AQS 实现的。
+
+AQS有2个重要组成部分：
+
+1. state 同步状态，int 类型，volatile关键字修饰
+
+由三种方法：getState()、setState()、compareAndSetState()这三种操作均是原子操作
+
+1. 一个同步队列
+
+当一个线程尝试获取锁时，如果已经被占用，此线程就作为一个节点添加到队尾，对头是成功获取锁的节点，对头释放锁后，会唤醒后面的节点，并出队。
+
+资源共享方式：
+
+AQS定义了2种共享方式：
+
+1. 独占 Exclusive（独占，只有一个线程能执行，如ReentrantLock）
+2. 共享 Share（共享，多个线程可同时执行，如Semaphore/CountDownLatch）
+
+获取锁和释放锁的流程：
+
+- 获取锁
+
+调用获取方法，如果成功则返回，否则构造node节点加入到队尾，以自旋的方式判断是否可以成为头节点，如果不能，就进入等待状态。
+
+- 释放锁
+
+调用释放方法，获取当前节点的下一个节点，唤醒后面的节点。
+
+在细节上2中方式有一些差异：
+
+1. 独占锁中 state 为1，代表一次只能一个线程执行，而在共享锁中 state > 1，同时可以有多个线程成功获取同步状态。
+2. 释放锁时，独占锁只唤醒后面的那一个节点，因为 state 为 1，叫醒一个就够了，而共享锁会唤醒后面所有节点，因为 state > 1，把后面的都唤醒，至于哪些线程能获取同步状态就看他们自己的了。
+
+
+### 11、forEach实现原理
+
+forEach对Collection是通过Iterator实现的，对数组是通过下标遍历实现的。
+
+java编译器隐藏了基于iteration和下标遍历的内部实现
+
+
+

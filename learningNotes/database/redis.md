@@ -222,10 +222,89 @@ sadd key value: set中插入值
 
 spop key: 获取set的值
 
-zadd: zset中设定值
-
-zpop: zset中get值
+zadd name num value: zset中设定值
 
 incr key: key的值增加1
 
 decr key：key的值减1
+
+### 7、zset数据结构
+
+zset是一个字符串集合，每一个字符串关联一个double类型的分数，redis正是通过分数来排序的
+
+zSet在redis中有两种实现：压缩双向链表（zipList)、跳表(skipList)
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+zipList是一个固定的数据结构，定义了链表字节长度、节点个数、尾节点偏移字节等内容
+
+redis配置文件中用来控制zset到底是使用ziplist(压缩双向链表)还是skiplist(跳表)的参数:
+
+zset-max-ziplist-entries 128
+
+zset-max-ziplist-value 64
+
+zset-max-ziplist-entries: zset使用ziplist存储的时候，最大限制存储entries的个数
+zset-max-ziplist-value: zset使用ziplist存储的时候，每个节点最大存储字节数
+
+违反上述两个限制条件，均会导致zset将ziplist的数据结构切换为skiplist数据结构
+
+而zset使用ziplist的原因，主要是出于在零散数据量少的时候，节省内存的占用
+
+### 8、HashMap
+
+redis的数据结构体是redisDB,存储在server.h文件中。redisDB存储数据库id(redis服务器默认有16个数据库)，键空间，过期键空间等数据。
+
+    typedef struct redisDb {
+    dict *dict;                 /* 键空间 */  存储key - value
+    dict *expires;              /* 过期键空间 */  存储key的过期时间
+    dict *blocking_keys;        /* 客户端在等待的键 (BLPOP) */
+    dict *ready_keys;           /* 接收到 push 的阻塞键 */
+    dict *watched_keys;         /* WATCHED keys for MULTI/EXEC CAS */
+    struct evictionPoolEntry *eviction_pool;    /* Eviction pool of keys */
+    int id;                     /* Database ID */
+    long long avg_ttl;          /* Average TTL, just for stats */
+    } redisDb;
+
+
+dict是dict.h文件中定义的结构体：
+
+      typedef struct dict {
+    	    dictType *type; // 类型特定函数  type 指向 操作字典增删改查的函数
+    	    void *privdata;  // 私有数据  保存着不同类型需要传递给type函数的可选参数  说白了不同类型选择						不同的操作函数
+    	    dictht ht[2];   // 保存两个hash表，ht[1]在扩容的时候会用到，是ht[0]的2倍
+    	    int rehashidx;   // rehash 索引 当rehash不进行时为-1   
+    	} dict;
+    
+    typedef struct dictht {
+    	    dictEntry **table;   // hash数组，元素为指向dicEntry的指针
+    	    unsigned long size;  // hash表的大小
+    	    unsigned long sizemask;  // hash 表的掩码 size-1
+    	    unsigned long used;     // hash表已使用的大小
+    	} dictht;
+    
+    typedef struct dictEntry {
+        void *key;     //键值
+        union {    // 值
+            void *val;
+            uint64_t u64;
+            int64_t s64;
+        } v;
+        struct dictEntry *next;  //指向hash冲突的下一个元素
+    } dictEntry;	
+redis的数据结构是reidsDB,redisDB中存储者键空间，过期键，redis数据库的id等数据。键空间中的内容有rehash索引，一大一小两个hash表等内容，hash表中存储hash数组，数组长度已使用大小等，hash数组中存储entry。
+
+与jkd中hashMap有所不同的是，redis中hashMap扩容时，采用的时渐进式扩容，每次查询获更新时，判断rehash索引值是否维-1，若不是，则每次将查询获更新的键值对从ht[0]中搬迁到ht[1]中去，并减少ht[0]中used的值，直到used值为0时，ht[1]变为ht[0];
+
+redis之所以不采用一次性拷贝，主要原因是当数据量较大时，这种拷贝就会比较耗时，这段时间redis就无法对外提供服务了。采用渐进式拷贝的方法虽然增加了复杂度，但提高了效率。
+
+开始rehash后，当进行查找、更新、删除时会遍历ht[0]和ht[1];
+
+redis中也是采用拉链的方法处理hash冲突的。
+
+
+
+
+
+
+
